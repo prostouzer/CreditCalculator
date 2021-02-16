@@ -1,35 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Ajax.Utilities;
 
 namespace CreditCalculator.Models
 {
     public class Credit
     {
-        public const decimal MinAmount = 1000; // минимально возможный кредит
-        public const decimal MinRate = 1; // минимально возможная ставка
+        public const int MinAmount = 1000; // минимально возможный кредит
+        public const int MinRate = 1; // минимально возможная ставка
 
         [Display(Name = "Сумма кредита")]
         [Required(ErrorMessage = "Введите сумму кредита")]
+        [Range(MinAmount, int.MaxValue, ErrorMessage = "Неправильное значение")]
         public decimal Amount { get; set; }
+
         [Display(Name = "Дата начала")]
         [Required(ErrorMessage = "Укажите дату начала")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
         public DateTime BeginDate { get; set; }
+
         [Display(Name = "Дата окончания")]
         [Required(ErrorMessage = "Укажите дату окончания")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
         public DateTime EndDate { get; set; }
+
         [Display(Name = "Ставка, % годовых")]
         [Required(ErrorMessage = "Укажите ставку")]
+        [Range(1, int.MaxValue, ErrorMessage = "Неправильное значение")]
         public double Rate { get; set; }
+
         [Display(Name = "Количество платежей")]
         [Required(ErrorMessage = "Укажите количество платежей")]
+        [Range(MinRate, int.MaxValue, ErrorMessage = "Неправильное значение")]
         public int PaymentPeriodsCount { get; set; }
 
         public decimal TotalPayment { get; set; }
+        public decimal Overpay { get; set; }
         public List<Payment> PaymentsList { get; set; } = new List<Payment>();
 
         public Credit() { }
@@ -39,6 +48,7 @@ namespace CreditCalculator.Models
             Rate *= 0.01; 
             Rate /= 12; // проценты годовых
             TotalPayment = CalculateTotalPayment();
+            Overpay = CalculateOverpay();
             GetPaymentsList();
         }
 
@@ -46,6 +56,11 @@ namespace CreditCalculator.Models
         {
             var annuityPayment = CalculateAnnuityPayment(Amount);
             return annuityPayment * PaymentPeriodsCount;
+        }
+
+        public decimal CalculateOverpay()
+        {
+            return CalculateTotalPayment() - Amount;
         }
 
         public void GetPaymentsList()

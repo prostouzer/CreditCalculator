@@ -11,7 +11,7 @@
 {
     @Html.AntiForgeryToken()
 
-    <table>
+    <table class="table">
         <thead>
             <tr>
                 <th>
@@ -34,24 +34,34 @@
         <tbody>
             @foreach (var payment in Model.PaymentsList)
             {
+                <tr>
+                    <td>
+                        @payment.Number
+                    </td>
+                    <td>
+                        @payment.Date.ToShortDateString()
+                    </td>
+                    <td>
+                        @payment.Body
+                    </td>
+                    <td>
+                        @payment.Percent
+                    </td>
+                    <td>
+                        @payment.RemainingDebt
+                    </td>
+                </tr>
+            }
+        <tr>
             <tr>
-                <td>
-                    @payment.Number
-                </td>
-                <td>
-                    @payment.Date
-                </td>
-                <td>
-                    @payment.Body
-                </td>
-                <td>
-                    @payment.Percent
-                </td>
-                <td>
-                    @payment.RemainingDebt
+                <td colspan="5">
+                    <h4>Переплата: @Model.Overpay</h4>
                 </td>
             </tr>
-            }
+            <td colspan="5">
+                <h3>Всего выплат: @Model.TotalPayment</h3>
+            </td>
+        </tr>
         </tbody>
     </table>
 }
