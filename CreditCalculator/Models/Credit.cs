@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Foolproof;
 using Microsoft.Ajax.Utilities;
 
 namespace CreditCalculator.Models
@@ -16,15 +17,17 @@ namespace CreditCalculator.Models
         public decimal Amount { get; set; }
 
         [Display(Name = "Дата начала")]
-        [Required(ErrorMessage = "Укажите дату начала")]
-        [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Date)]
+        [Required(ErrorMessage = "Укажите дату начала")]
+        [LessThan("EndDate", ErrorMessage = "Дата начала должна быть раньше даты окончания")]
         public DateTime BeginDate { get; set; }
 
         [Display(Name = "Дата окончания")]
-        [Required(ErrorMessage = "Укажите дату окончания")]
-        [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Date)]
+        [Required(ErrorMessage = "Укажите дату окончания")]
+        [GreaterThan("BeginDate", ErrorMessage = "Дата окончания должна быть позже даты начала")]
         public DateTime EndDate { get; set; }
 
         [Display(Name = "Ставка, % годовых")]
