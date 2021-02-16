@@ -1,8 +1,62 @@
-﻿@model CreditCalculator.Models.Credit
+﻿@using CreditCalculator.Models
+@model CreditCalculator.Models.Credit
 
 @{
-    ViewBag.Title = "GetPayments";
+    ViewBag.Title = "Платежи";
 }
 
-<h2>GetPayments</h2>
+<h2>Платежи</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    № платежа
+                </th>
+                <th>
+                    Дата платежа
+                </th>
+                <th>
+                    Размер платежа по телу
+                </th>
+                <th>
+                    Размер платежа по проценту
+                </th>
+                <th>
+                    Остаток основного долга
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payment in Model.PaymentsList)
+            {
+            <tr>
+                <td>
+                    @payment.Number
+                </td>
+                <td>
+                    @payment.Date
+                </td>
+                <td>
+                    @payment.Body
+                </td>
+                <td>
+                    @payment.Percent
+                </td>
+                <td>
+                    @payment.RemainingDebt
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
 

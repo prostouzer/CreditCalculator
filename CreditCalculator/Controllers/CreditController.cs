@@ -21,13 +21,13 @@ namespace CreditCalculator.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-            credit.Configure();
             return RedirectToAction("GetPayments", credit);
         }
 
         public ActionResult GetPayments(Credit credit)
         {
-            return View();
+            credit.Configure();
+            return View(credit);
         }
     }
 }

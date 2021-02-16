@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Web;
 
 namespace CreditCalculator.Models
 {
@@ -25,7 +22,7 @@ namespace CreditCalculator.Models
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
         public DateTime EndDate { get; set; }
-        [Display(Name = "Ставка, %")]
+        [Display(Name = "Ставка, % годовых")]
         [Required(ErrorMessage = "Укажите ставку")]
         public double Rate { get; set; }
         [Display(Name = "Количество платежей")]
@@ -39,7 +36,8 @@ namespace CreditCalculator.Models
 
         public void Configure()
         {
-            Rate *= 0.01;
+            Rate *= 0.01; 
+            Rate /= 12; // проценты годовых
             TotalPayment = CalculateTotalPayment();
             GetPaymentsList();
         }
@@ -55,9 +53,11 @@ namespace CreditCalculator.Models
             var paymentDate = BeginDate;
             var daysBetweenPeriods = GetDaysBetweenPeriods(); // количество дней между платежами
             var annuityPayment = CalculateAnnuityPayment(Amount);
+            var remainingDebt = TotalPayment;
             for (int i = 0; i < PaymentPeriodsCount; i++)
             {
-                PaymentsList.Add(new Payment(i + 1, paymentDate.AddDays(daysBetweenPeriods), annuityPayment, TotalPayment - annuityPayment));
+                paymentDate = paymentDate.AddDays(daysBetweenPeriods);
+                PaymentsList.Add(new Payment(i + 1, paymentDate, annuityPayment, remainingDebt -= annuityPayment));
             }
         }
 
@@ -68,7 +68,7 @@ namespace CreditCalculator.Models
 
             // размер аннуитетного платежа = коэффициент аннуитета * сумма кредита
             var annuityPayment = (decimal)annuityCoefficient * creditAmount;
-            return annuityPayment;
+            return Decimal.Round(annuityPayment, 2);
         }
 
         public int GetTotalDays()
@@ -80,7 +80,6 @@ namespace CreditCalculator.Models
         {
             return GetTotalDays() / PaymentPeriodsCount;
         }
-
         public class Payment // для отображения списка платежей на таблице
         {
             public int Number { get; set; } // № платежа
