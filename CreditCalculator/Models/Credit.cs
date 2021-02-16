@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
@@ -11,21 +12,34 @@ namespace CreditCalculator.Models
         public const decimal MinAmount = 1000; // минимально возможный кредит
         public const decimal MinRate = 1; // минимально возможная ставка
 
+        [Display(Name = "Сумма кредита")]
+        [Required(ErrorMessage = "Введите сумму кредита")]
         public decimal Amount { get; set; }
+        [Display(Name = "Дата начала")]
+        [Required(ErrorMessage = "Укажите дату начала")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
         public DateTime BeginDate { get; set; }
+        [Display(Name = "Дата окончания")]
+        [Required(ErrorMessage = "Укажите дату окончания")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
         public DateTime EndDate { get; set; }
+        [Display(Name = "Ставка, %")]
+        [Required(ErrorMessage = "Укажите ставку")]
         public double Rate { get; set; }
+        [Display(Name = "Количество платежей")]
+        [Required(ErrorMessage = "Укажите количество платежей")]
+        public int PaymentPeriodsCount { get; set; }
 
-        public int PaymentPeriodsCount { get; set; } // количество платежей
         public decimal TotalPayment { get; set; }
-        public List<Payment> PaymentsList { get; set; }
+        public List<Payment> PaymentsList { get; set; } = new List<Payment>();
 
-        public Credit(decimal amount, DateTime beginDate, DateTime endDate, decimal rate, int paymentPeriodsNumber)
+        public Credit() { }
+
+        public void Configure()
         {
-            // валидация
-            if (!((amount >= MinAmount) && (beginDate < endDate) && rate >= MinRate) && (paymentPeriodsNumber >= 1))
-                throw new ArgumentException($"Ошибка во входных параметрах (сумма должна быть >= {MinAmount}, дата начала должна быть меньше даты окончания, ставка должна быть >= {MinRate}, количество платежей должно быть >= {PaymentPeriodsCount}");
-
+            Rate *= 0.01;
             TotalPayment = CalculateTotalPayment();
             GetPaymentsList();
         }
@@ -50,26 +64,16 @@ namespace CreditCalculator.Models
         public decimal CalculateAnnuityPayment(decimal creditAmount)
         {
             // коэффициент аннуитета = (i*(1+i)^n)/((1+i)^n - 1), где i - процентная ставка по кредиту, n = количество платежей
-            var annuityCoefficient = (Rate * Math.Pow((1 + Rate), PaymentPeriodsCount)) / (Math.Pow((1 + Rate), PaymentPeriodsCount) - 1);
+            var annuityCoefficient = (Rate * Math.Pow(1 + Rate, PaymentPeriodsCount)) / (Math.Pow(1 + Rate, PaymentPeriodsCount) - 1);
 
             // размер аннуитетного платежа = коэффициент аннуитета * сумма кредита
             var annuityPayment = (decimal)annuityCoefficient * creditAmount;
             return annuityPayment;
         }
 
-        //public void GetPaymentsList()
-        //{
-        //    var paymentDate = BeginDate;
-        //    var daysBetweenPeriods = GetDaysBetweenPeriods();
-        //    List<Payment> payments = new List<Payment>();
-        //    for (int i = 0; i<PaymentPeriodsCount.)
-
-        //    var payment = new Payment(i + 1, paymentDate.AddDays(daysBetweenPeriods), 1, 1, )
-        //}
-
         public int GetTotalDays()
         {
-            return (BeginDate.Date - EndDate.Date).Days;
+            return (EndDate.Date - BeginDate.Date).Days;
         }
 
         public int GetDaysBetweenPeriods()
@@ -91,8 +95,8 @@ namespace CreditCalculator.Models
             {
                 Number = number;
                 Date = date.Date;
-                Body = payment;
-                Percent = payment;
+                Body = payment; // TODO рассчитать платеж по телу
+                Percent = payment; // TODO рассчитать платеж по проценту
                 //Body = body;
                 //Percent = percent;
                 RemainingDebt = remainingDebt;
