@@ -12,7 +12,6 @@
     @Html.AntiForgeryToken()
     
 <div class="form-horizontal">
-    <h4></h4>
     <hr />
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="form-group">
@@ -62,7 +61,7 @@
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Рассчитать" class="btn btn-default" />
+            <input type="submit" value="Рассчитать" class="btn btn-primary" />
         </div>
     </div>
 </div>
@@ -88,20 +87,23 @@
         $("#endDateEditor").on('change', displayDaysDifference);
 
         function displayDaysDifference() {
-            var beginDate = new Date($("#beginDateEditor").val());
-            var endDate = new Date($("#endDateEditor").val());
 
-            var diffDays = parseInt((endDate - beginDate) / (1000 * 60 * 60 * 24), 10);
+            var diffDays = calculateDaysDiff();
 
             var paymentPeriodsCount = $("#paymentsPeriodsCountEditor").val();
-            var daysBetweenPeriods = Math.ceil(diffDays / paymentPeriodsCount);
-
-            if (diffDays > 0 && paymentPeriodsCount > 0
-            ) { // true если beginDate < endDate и указанное количество платежей > 0
+            if (diffDays > 0 && paymentPeriodsCount > 0) { // true если beginDate < endDate и указанное количество платежей > 0
+                var daysBetweenPeriods = Math.round(diffDays / paymentPeriodsCount);
                 $("#daysBetweenPeriods").text("Платеж каждый " + daysBetweenPeriods + " день(-я)");
             } else {
                 $("#daysBetweenPeriods").text("Платеж каждый ... день(-я)");
             }
+        }
+
+        function calculateDaysDiff() {
+            var beginDate = new Date($("#beginDateEditor").val());
+            var endDate = new Date($("#endDateEditor").val());
+
+            return parseInt((endDate - beginDate) / (1000 * 60 * 60 * 24), 10);
         }
     </script>
 }
