@@ -56,7 +56,7 @@
     </div>
     <div class="form-group">
         <div class="col-md-10">
-            <p id="daysBetweenPeriods">Платеж каждые ... дня(-ей)</p>
+            <p id="daysBetweenPeriods">Платеж каждый ... день(-я)</p>
         </div>
     </div>
 
@@ -84,7 +84,9 @@
     </script>
     <script>
         $("#paymentsPeriodsCountEditor").on('change', displayDaysDifference);
-        
+        $("#beginDateEditor").on('change', displayDaysDifference);
+        $("#endDateEditor").on('change', displayDaysDifference);
+
         function displayDaysDifference() {
             var beginDate = new Date($("#beginDateEditor").val());
             var endDate = new Date($("#endDateEditor").val());
@@ -92,9 +94,14 @@
             var diffDays = parseInt((endDate - beginDate) / (1000 * 60 * 60 * 24), 10);
 
             var paymentPeriodsCount = $("#paymentsPeriodsCountEditor").val();
-            var daysBetweenPeriods = Math.round(diffDays / paymentPeriodsCount);
+            var daysBetweenPeriods = Math.ceil(diffDays / paymentPeriodsCount);
 
-            $("#daysBetweenPeriods").text("Платеж каждые " + daysBetweenPeriods + " дня(-ей)");
+            if (diffDays > 0 && paymentPeriodsCount > 0
+            ) { // true если beginDate < endDate и указанное количество платежей > 0
+                $("#daysBetweenPeriods").text("Платеж каждый " + daysBetweenPeriods + " день(-я)");
+            } else {
+                $("#daysBetweenPeriods").text("Платеж каждый ... день(-я)");
+            }
         }
     </script>
 }
