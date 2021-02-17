@@ -1,5 +1,4 @@
-﻿@using CreditCalculator.Models
-@model CreditCalculator.Models.Credit
+﻿@model CreditCalculator.Models.Credit
 
 @{
     ViewBag.Title = "Платежи";
@@ -45,27 +44,27 @@
                         @payment.Date.ToShortDateString()
                     </td>
                     <td>
-                        @Decimal.Round(payment.AnnuityPayment, 2)
+                        @decimal.Round(payment.AnnuityPayment, 2)
                     </td>
                     <td>
-                        @Decimal.Round(payment.Body, 2)
+                        @decimal.Round(payment.Body, 2)
                     </td>
                     <td>
-                        @Decimal.Round(payment.Percent, 2)
+                        @decimal.Round(payment.Percent, 2)
                     </td>
                     <td>
-                        @Decimal.Round(payment.RemainingDebt, 2)
+                        @decimal.Round(payment.RemainingDebt, 2)
                     </td>
                 </tr>
             }
             <tr>
                 <td colspan="5">
-                    <h4>Переплата: @Decimal.Round(Model.Overpay, 2)</h4>
+                    <h4>Переплата: @decimal.Round(Model.Overpay, 2)</h4>
                 </td>
             </tr>
             <tr>
                 <td colspan="5">
-                    <h3>Всего выплат: @Decimal.Round(Model.TotalPayment, 2)</h3>
+                    <h3>Всего выплат: @decimal.Round(Model.TotalPayment, 2)</h3>
                 </td>
             </tr>
         </tbody>

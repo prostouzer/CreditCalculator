@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Foolproof;
-using Microsoft.Ajax.Utilities;
 
 namespace CreditCalculator.Models
 {
@@ -46,8 +45,6 @@ namespace CreditCalculator.Models
         public decimal Overpay { get; set; }
         public List<Payment> PaymentsList { get; set; } = new List<Payment>();
 
-        public Credit() { }
-
         public void Configure()
         {
             Rate *= 0.01; 
@@ -74,7 +71,7 @@ namespace CreditCalculator.Models
             var daysBetweenPeriods = GetDaysBetweenPeriods(); // количество дней между платежами
             var annuityPayment = CalculateAnnuityPayment(Amount);
             var remainingDebt = Amount;
-            for (int i = 0; i < PaymentPeriodsCount; i++)
+            for (var i = 0; i < PaymentPeriodsCount; i++)
             {
                 var number = i + 1;
                 var body = CalculateBody(number, annuityPayment);
@@ -87,7 +84,7 @@ namespace CreditCalculator.Models
         public decimal CalculateAnnuityPayment(decimal creditAmount)
         {
             // коэффициент аннуитета = (i*(1+i)^n)/((1+i)^n - 1), где i - процентная ставка по кредиту, n = количество платежей
-            var annuityCoefficient = (Rate * Math.Pow(1 + Rate, PaymentPeriodsCount)) / (Math.Pow(1 + Rate, PaymentPeriodsCount) - 1);
+            var annuityCoefficient = Rate * Math.Pow(1 + Rate, PaymentPeriodsCount) / (Math.Pow(1 + Rate, PaymentPeriodsCount) - 1);
 
             // размер аннуитетного платежа = коэффициент аннуитета * сумма кредита
             var annuityPayment = (decimal)annuityCoefficient * creditAmount;
