@@ -75,7 +75,7 @@ namespace CreditCalculator.Models
             for (int i = 0; i < PaymentPeriodsCount; i++)
             {
                 paymentDate = paymentDate.AddDays(daysBetweenPeriods);
-                PaymentsList.Add(new Payment(i + 1, paymentDate, annuityPayment, remainingDebt -= annuityPayment));
+                PaymentsList.Add(new Payment(this, i + 1, paymentDate, annuityPayment, remainingDebt -= annuityPayment));
             }
         }
 
@@ -86,7 +86,7 @@ namespace CreditCalculator.Models
 
             // размер аннуитетного платежа = коэффициент аннуитета * сумма кредита
             var annuityPayment = (decimal)annuityCoefficient * creditAmount;
-            return Decimal.Round(annuityPayment, 2);
+            return annuityPayment;
         }
 
         public int GetTotalDays()
@@ -100,24 +100,36 @@ namespace CreditCalculator.Models
         }
         public class Payment // для отображения списка платежей на таблице
         {
+            private Credit Credit { get; }
+
             public int Number { get; set; } // № платежа
             public DateTime Date { get; set; } // дата платежа
+            public decimal AnnuityPayment { get; set; }
             public decimal Body { get; set; } // размер платежа по телу
             public decimal Percent { get; set; } // размер платежа по проценту
             public decimal RemainingDebt { get; set; } // остаток основного долга
 
-            // TODO get percent/body payment amounts
-            //public Payment(int number, DateTime date, decimal body, decimal percent, decimal remainingDebt)
-            public Payment(int number, DateTime date, decimal payment, decimal remainingDebt)
+            public Payment(Credit credit, int number, DateTime date, decimal payment, decimal remainingDebt)
             {
+                Credit = credit;
+
                 Number = number;
                 Date = date.Date;
-                Body = payment; // TODO рассчитать платеж по телу
-                Percent = payment; // TODO рассчитать платеж по проценту
-                //Body = body;
-                //Percent = percent;
+                AnnuityPayment = payment;
+                Percent = CalculatePercent(payment);
+                Body = CalculateBody(payment);
                 RemainingDebt = remainingDebt;
             }
+
+            public decimal CalculateBody(decimal annuityPayment)
+            {
+                return annuityPayment / (decimal) Math.Pow(1 + Credit.Rate, Credit.PaymentPeriodsCount - Number + 1);
+            }
+            public decimal CalculatePercent(decimal annuityPayment)
+            {
+                return annuityPayment * (1 - 1 / (decimal) Math.Pow(1 + Credit.Rate, Credit.PaymentPeriodsCount - Number + 1));
+            }
+
         }
     }
 }
