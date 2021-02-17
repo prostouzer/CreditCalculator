@@ -10,6 +10,8 @@ namespace CreditCalculator.Models
     {
         public const int MinAmount = 1000; // минимально возможный кредит
         public const int MinRate = 1; // минимально возможная ставка
+        public const int MaxRate = 10000; // максимальная ставка % годовых
+        public const int MaxPaymentPeriodsCount = 1000; // максимальное количество платежей
 
         [Display(Name = "Сумма кредита")]
         [Required(ErrorMessage = "Введите сумму кредита")]
@@ -32,12 +34,12 @@ namespace CreditCalculator.Models
 
         [Display(Name = "Ставка, % годовых")]
         [Required(ErrorMessage = "Укажите ставку")]
-        [Range(1, int.MaxValue, ErrorMessage = "Неправильное значение")]
+        [Range(1, MaxRate, ErrorMessage = "Неправильное значение")]
         public double Rate { get; set; }
 
         [Display(Name = "Количество платежей")]
         [Required(ErrorMessage = "Укажите количество платежей")]
-        [Range(MinRate, int.MaxValue, ErrorMessage = "Неправильное значение")]
+        [Range(MinRate, MaxPaymentPeriodsCount, ErrorMessage = "Неправильное значение")]
         public int PaymentPeriodsCount { get; set; }
 
         public decimal TotalPayment { get; set; }
