@@ -10,73 +10,126 @@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
-<div class="form-horizontal">
-    <hr />
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-    <div class="form-group">
-        @Html.LabelFor(model => model.CreditAmount, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.CreditAmount, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.CreditAmount, "", new { @class = "text-danger" })
-        </div>
-    </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.Rate, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.Rate, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.Rate, "", new { @class = "text-danger" })
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.CreditAmount, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CreditAmount, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CreditAmount, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        @Html.LabelFor(model => model.IsAnnualRate, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.CheckBoxFor(model => model.IsAnnualRate, new { htmlAttributes = new { @class = "form-control" } })
-        </div>
-    </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.RepaymentPeriodicity, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EnumDropDownListFor(model => model.RepaymentPeriodicity, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.RepaymentPeriodicity, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Rate, new { @class = "control-label col-md-2", id="rateLabel" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Rate, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Rate, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsAnnualRate, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.CheckBoxFor(model => model.IsAnnualRate, new { @class = "form-control", id="isAnnualRate" })
+            </div>
+        </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.DaysBetweenPeriods, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.DaysBetweenPeriods, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.DaysBetweenPeriods, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.RepaymentPeriodicity, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EnumDropDownListFor(model => model.RepaymentPeriodicity, new { @class = "form-control", id = "repaymentPeriodicity" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.Days, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.Days, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.Days, "", new { @class = "text-danger" })
+        <div class="form-group" id="daysDiv">
+            @Html.LabelFor(model => model.Days, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Days, new { htmlAttributes = new { @class = "form-control", id = "days" } })
+                @Html.ValidationMessageFor(model => model.Days, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.DaysBetweenPeriods, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.DaysBetweenPeriods, new { htmlAttributes = new { @class = "form-control", id = "daysBetweenPeriods" } })
+                @Html.ValidationMessageFor(model => model.DaysBetweenPeriods, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.Months, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.Months, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.Months, "", new { @class = "text-danger" })
+        <div class="form-group" id="monthsDiv">
+            @Html.LabelFor(model => model.Months, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Months, new { htmlAttributes = new { @class = "form-control", id="months" } })
+                @Html.ValidationMessageFor(model => model.Months, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Рассчитать" class="btn btn-primary" />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Рассчитать" class="btn btn-primary" id="submitBtn"/>
+            </div>
         </div>
     </div>
-</div>
 }
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 
+    <script>
+        $("#isAnnualRate").on('change',
+            function() {
+                if (this.checked == true) {
+                    $("#rateLabel").text("Ставка, % в год");
+                }
+                if (this.checked == false) {
+                    $("#rateLabel").text("Ставка, % в день");
+                }
+            });
+    </script>
+    <script>
+        $("#repaymentPeriodicity").on('change',
+            function () {
+                if ($("#repaymentPeriodicity").val() == 0) {
+                    onDaysPeriodicity();
+                }
+                if ($("#repaymentPeriodicity").val() == 1) {
+                    onMonthsPeriodicity();
+                }
+            });
+
+        function onDaysPeriodicity() {
+            $("#months").val("");
+            $("#monthsDiv").hide();
+            $("#daysDiv").show();
+        }
+        function onMonthsPeriodicity() {
+            $("#days").val("");
+            $("#daysBetweenPeriods").val("");
+            $("#daysDiv").hide();
+            $("#monthsDiv").show();
+        }
+    </script>
+    <script>
+        var daysBetweenPeriodsAreValid = true;
+        $(document).on('submit',
+            function () {
+                validateDaysBetweenPeriods();
+                if (!daysBetweenPeriodsAreValid) {
+                    alert("Срок кредита должен быть кратным шага платежа");
+                    event.preventDefault();
+                }
+            });
+
+        function validateDaysBetweenPeriods() {
+            if ($("#days").val() != "" && $("#months").val() != "" && $("#daysBetweenPeriods").val() != "") {
+                var totalDays = $("#days").val();
+                var daysBetweenPeriods = $("#daysBetweenPeriods").val();
+                if (totalDays % daysBetweenPeriods == 0) {
+                    daysBetweenPeriodsAreValid = true;
+                } else {
+                    daysBetweenPeriodsAreValid = false;
+                }
+            }
+        }
+    </script>
 }

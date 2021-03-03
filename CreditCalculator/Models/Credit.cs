@@ -33,7 +33,7 @@ namespace CreditCalculator.Models
         [Range(MinRate, MaxRate, ErrorMessage = "Неправильное значение")]
         public double Rate { get; set; }
 
-        [Display(Name = "в год")]
+        [Display(Name = "Годовая ставка")]
         public bool IsAnnualRate { get; set; } // годовая ставка
 
         [Display(Name = "Периодичность платежей")]
@@ -69,7 +69,8 @@ namespace CreditCalculator.Models
             }
             else
             {
-                Rate *= 30;
+                var coef = (double)365 / 12;
+                Rate *= coef;
             }
             _paymentPeriodsCount = CalculatePeriodsCount();
 
