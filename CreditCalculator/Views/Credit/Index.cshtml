@@ -15,26 +15,10 @@
     <hr />
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="form-group">
-        @Html.LabelFor(model => model.Amount, new { @class = "control-label col-md-2" })
+        @Html.LabelFor(model => model.CreditAmount, new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            @Html.EditorFor(model => model.Amount, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
-        </div>
-    </div>
-
-    <div class="form-group">
-        @Html.LabelFor(model => model.BeginDate, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.BeginDate, new { htmlAttributes = new { @class = "form-control", id = "beginDateEditor" } })
-            @Html.ValidationMessageFor(model => model.BeginDate, "", new { @class = "text-danger" })
-        </div>
-    </div>
-
-    <div class="form-group">
-        @Html.LabelFor(model => model.EndDate, new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @class = "form-control", id = "endDateEditor" } })
-            @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+            @Html.EditorFor(model => model.CreditAmount, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.CreditAmount, "", new { @class = "text-danger" })
         </div>
     </div>
 
@@ -47,15 +31,34 @@
     </div>
 
     <div class="form-group">
-        @Html.LabelFor(model => model.PaymentPeriodsCount, new { @class = "control-label col-md-2" })
+        @Html.LabelFor(model => model.RepaymentPeriodicity, new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            @Html.EditorFor(model => model.PaymentPeriodsCount, new { htmlAttributes = new { @class = "form-control", id = "paymentsPeriodsCountEditor" } })
-            @Html.ValidationMessageFor(model => model.PaymentPeriodsCount, "", new { @class = "text-danger" })
+            @Html.EnumDropDownListFor(model => model.RepaymentPeriodicity, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.RepaymentPeriodicity, "", new { @class = "text-danger" })
         </div>
     </div>
+
     <div class="form-group">
+        @Html.LabelFor(model => model.DaysBetweenPeriods, new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            <p id="daysBetweenPeriods">Платеж каждый ... день(-я)</p>
+            @Html.EditorFor(model => model.DaysBetweenPeriods, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.DaysBetweenPeriods, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Days, new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Days, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Days, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Months, new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Months, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Months, "", new { @class = "text-danger" })
         </div>
     </div>
 
@@ -70,40 +73,4 @@
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 
-    <script>
-        $(document).ready(function () {
-            var d = new Date();
-            var month = d.getMonth() + 1; // если месяц меньше 10, то надо подставить 0 в начале месяца (чтобы подходил по формату, напр. если февраль - то вернет "02" вместо "2")
-            if (month < 10) {
-                month = "0" + month;
-            }
-            var today = d.getFullYear() + "-" + (month) + "-" + d.getDate();
-            $("#beginDateEditor").val(today);
-        })
-    </script>
-    <script>
-        $("#paymentsPeriodsCountEditor").on('change', displayDaysDifference);
-        $("#beginDateEditor").on('change', displayDaysDifference);
-        $("#endDateEditor").on('change', displayDaysDifference);
-
-        function displayDaysDifference() {
-
-            var diffDays = calculateDaysDiff();
-
-            var paymentPeriodsCount = $("#paymentsPeriodsCountEditor").val();
-            if (diffDays > 0 && paymentPeriodsCount > 0) { // true если beginDate < endDate и указанное количество платежей > 0
-                var daysBetweenPeriods = Math.round(diffDays / paymentPeriodsCount);
-                $("#daysBetweenPeriods").text("Платеж каждый " + daysBetweenPeriods + " день(-я)");
-            } else {
-                $("#daysBetweenPeriods").text("Платеж каждый ... день(-я)");
-            }
-        }
-
-        function calculateDaysDiff() {
-            var beginDate = new Date($("#beginDateEditor").val());
-            var endDate = new Date($("#endDateEditor").val());
-
-            return parseInt((endDate - beginDate) / (1000 * 60 * 60 * 24), 10);
-        }
-    </script>
 }

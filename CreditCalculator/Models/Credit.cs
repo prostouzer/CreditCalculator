@@ -7,39 +7,50 @@ namespace CreditCalculator.Models
 {
     public class Credit
     {
-        public const int MinAmount = 1000; // минимально возможный кредит
-        public const int MinRate = 1; // минимально возможная ставка
+        public const int MinAmount = 1000; // минимально возможная сумма кредита
+
+        public const int MinRate = 1; // минимально возможная ставка % годовых
         public const int MaxRate = 10000; // максимальная ставка % годовых
-        public const int MaxPaymentPeriodsCount = 1000; // максимальное количество платежей
+
+        public const int MinDays = 10; // минимальное количество дней
+        public const int MaxDays = 1000; // максимальное количество дней
+
+        public const int MinMonths = 1; // минимальное количество месяцев
+        public const int MaxMonths = 1200; // максимальное количество месяцев
+
+        private DateTime _beginDate;
+
+        private int _paymentPeriodsCount;
+
 
         [Display(Name = "Сумма кредита")]
         [Required(ErrorMessage = "Введите сумму кредита")]
         [Range(MinAmount, int.MaxValue, ErrorMessage = "Неправильное значение")]
-        public decimal Amount { get; set; }
-
-        [Display(Name = "Дата начала")]
-        [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
-        [DataType(DataType.Date)]
-        [Required(ErrorMessage = "Укажите дату начала")]
-        [LessThan("EndDate", ErrorMessage = "Дата начала должна быть раньше даты окончания")]
-        public DateTime BeginDate { get; set; }
-
-        [Display(Name = "Дата окончания")]
-        [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
-        [DataType(DataType.Date)]
-        [Required(ErrorMessage = "Укажите дату окончания")]
-        [GreaterThan("BeginDate", ErrorMessage = "Дата окончания должна быть позже даты начала")]
-        public DateTime EndDate { get; set; }
+        public decimal CreditAmount { get; set; }
 
         [Display(Name = "Ставка, % годовых")]
         [Required(ErrorMessage = "Укажите ставку")]
-        [Range(1, MaxRate, ErrorMessage = "Неправильное значение")]
+        [Range(MinRate, MaxRate, ErrorMessage = "Неправильное значение")]
         public double Rate { get; set; }
 
-        [Display(Name = "Количество платежей")]
-        [Required(ErrorMessage = "Укажите количество платежей")]
-        [Range(MinRate, MaxPaymentPeriodsCount, ErrorMessage = "Неправильное значение")]
-        public int PaymentPeriodsCount { get; set; }
+        [Display(Name = "Периодичность платежей")]
+        [Required(ErrorMessage = "Укажите периодичность платежей")]
+        public RepaymentPeriodicity RepaymentPeriodicity { get; set; } = RepaymentPeriodicity.Months;
+
+        [Display(Name = "Срок (дней)")]
+        [RequiredIf("RepaymentPeriodicity", Operator.EqualTo, RepaymentPeriodicity.Days, ErrorMessage = "Введите значение")]
+        [Range(MinDays, MaxDays, ErrorMessage = "Неправильное значение")]
+        public int? Days { get; set; }
+
+        [Display(Name = "Шаг платежа в днях")]
+        [RequiredIf("RepaymentPeriodicity", Operator.EqualTo, RepaymentPeriodicity.Days, ErrorMessage = "Введите значение")]
+        [Range(1, MaxDays)] // количество дней между платежами должно быть больше 1 и не больше MaxDays 
+        public int? DaysBetweenPeriods { get; set; }
+
+        [Display(Name = "Срок (месяцев)")]
+        [RequiredIf("RepaymentPeriodicity", Operator.EqualTo, RepaymentPeriodicity.Months, ErrorMessage = "Введите значение")]
+        [Range(MinMonths, MaxMonths, ErrorMessage = "Неправильное значение")]
+        public int? Months { get; set; }
 
         public decimal TotalPayment { get; set; }
         public decimal Overpay { get; set; }
@@ -47,44 +58,85 @@ namespace CreditCalculator.Models
 
         public void Configure()
         {
-            Rate *= 0.01; 
+            Rate *= 0.01;
             Rate /= 12; // проценты годовых
+            _paymentPeriodsCount = CalculatePeriodsCount();
+
             TotalPayment = CalculateTotalPayment();
             Overpay = CalculateOverpay();
+            _beginDate = DateTime.Now.Date;
             GetPaymentsList();
+        }
+
+        public int CalculatePeriodsCount()
+        {
+            switch (RepaymentPeriodicity)
+            {
+                case RepaymentPeriodicity.Days:
+                    return GetPeriodsCount_Days();
+                case RepaymentPeriodicity.Months:
+                    return (GetPeriodsCount_Months()); // оплата каждый месяц
+            }
+
+            return -1;
+        }
+        public int GetPeriodsCount_Days()
+        {
+            var totalDays = Days ?? default(int);
+            var daysBetweenPeriods = DaysBetweenPeriods ?? default(int);
+            return totalDays / daysBetweenPeriods;
+        }
+
+        public int GetPeriodsCount_Months()
+        {
+            return Months ?? default(int); // оплата каждый месяц
         }
 
         public decimal CalculateTotalPayment()
         {
-            var annuityPayment = CalculateAnnuityPayment(Amount);
-            return annuityPayment * PaymentPeriodsCount;
+            var annuityPayment = CalculateAnnuityPayment(CreditAmount);
+            return annuityPayment * _paymentPeriodsCount;
         }
 
         public decimal CalculateOverpay()
         {
-            return CalculateTotalPayment() - Amount;
+            return CalculateTotalPayment() - CreditAmount;
         }
 
         public void GetPaymentsList()
         {
-            var paymentDate = BeginDate;
-            var daysBetweenPeriods = GetDaysBetweenPeriods(); // количество дней между платежами
-            var annuityPayment = CalculateAnnuityPayment(Amount);
-            var remainingDebt = Amount;
-            for (var i = 0; i < PaymentPeriodsCount; i++)
+            var paymentDate = _beginDate;
+            var annuityPayment = CalculateAnnuityPayment(CreditAmount);
+            var remainingDebt = CreditAmount;
+            for (var i = 0; i < _paymentPeriodsCount; i++)
             {
                 var number = i + 1;
                 var body = CalculateBody(number, annuityPayment);
                 var percent = CalculatePercent(number, annuityPayment);
-                paymentDate = paymentDate.AddDays(daysBetweenPeriods);
+
+                paymentDate = AddTimeToPaymentDate(paymentDate);
                 PaymentsList.Add(new Payment(number, paymentDate, annuityPayment, body, percent, remainingDebt -= body));
             }
+        }
+
+        public DateTime AddTimeToPaymentDate(DateTime paymentDate) // расчитывает дату оплаты очередного платежа
+        {
+            switch (RepaymentPeriodicity)
+            {
+                case RepaymentPeriodicity.Days:
+                    var daysBetweenPeriods = DaysBetweenPeriods ?? default(int);
+                    return paymentDate.AddDays(daysBetweenPeriods);
+                case RepaymentPeriodicity.Months:
+                    return paymentDate.AddMonths(1); // оплата ежемесячно
+            }
+
+            return default(DateTime);
         }
 
         public decimal CalculateAnnuityPayment(decimal creditAmount)
         {
             // коэффициент аннуитета = (i*(1+i)^n)/((1+i)^n - 1), где i - процентная ставка по кредиту, n = количество платежей
-            var annuityCoefficient = Rate * Math.Pow(1 + Rate, PaymentPeriodsCount) / (Math.Pow(1 + Rate, PaymentPeriodsCount) - 1);
+            var annuityCoefficient = Rate * Math.Pow(1 + Rate, _paymentPeriodsCount) / (Math.Pow(1 + Rate, _paymentPeriodsCount) - 1);
 
             // размер аннуитетного платежа = коэффициент аннуитета * сумма кредита
             var annuityPayment = (decimal)annuityCoefficient * creditAmount;
@@ -92,22 +144,13 @@ namespace CreditCalculator.Models
         }
         public decimal CalculateBody(int number, decimal annuityPayment)
         {
-            return annuityPayment / (decimal)Math.Pow(1 + Rate, PaymentPeriodsCount - number + 1);
+            return annuityPayment / (decimal)Math.Pow(1 + Rate, _paymentPeriodsCount - number + 1);
         }
         public decimal CalculatePercent(int number, decimal annuityPayment)
         {
-            return annuityPayment * (1 - 1 / (decimal)Math.Pow(1 + Rate, PaymentPeriodsCount - number + 1));
+            return annuityPayment * (1 - 1 / (decimal)Math.Pow(1 + Rate, _paymentPeriodsCount - number + 1));
         }
 
-        public int GetTotalDays()
-        {
-            return (EndDate.Date - BeginDate.Date).Days;
-        }
-
-        public int GetDaysBetweenPeriods()
-        {
-            return GetTotalDays() / PaymentPeriodsCount;
-        }
         public class Payment // для отображения списка платежей на таблице
         {
             public int Number { get; set; } // № платежа
@@ -127,5 +170,13 @@ namespace CreditCalculator.Models
                 RemainingDebt = remainingDebt;
             }
         }
+    }
+    public enum RepaymentPeriodicity
+    {
+        [Display(Name = "В днях")]
+        Days = 0,
+
+        [Display(Name = "В месяцах")]
+        Months = 1
     }
 }
