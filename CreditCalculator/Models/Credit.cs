@@ -63,13 +63,13 @@ namespace CreditCalculator.Models
         public void Configure()
         {
             Rate *= 0.01;
-            if (IsAnnualRate)
+            if (IsAnnualRate) // ставка % в год
             {
                 Rate /= 12;
             }
-            else
+            else // ставка % в день
             {
-                var coef = (double)365 / 12;
+                const double coef = (double)365 / 12;
                 Rate *= coef;
             }
             _paymentPeriodsCount = CalculatePeriodsCount();
@@ -87,21 +87,21 @@ namespace CreditCalculator.Models
                 case RepaymentPeriodicity.Days:
                     return GetPeriodsCount_Days();
                 case RepaymentPeriodicity.Months:
-                    return (GetPeriodsCount_Months()); // оплата каждый месяц
+                    return GetPeriodsCount_Months(); // оплата каждый месяц
             }
 
             return -1;
         }
         public int GetPeriodsCount_Days()
         {
-            var totalDays = Days ?? default(int);
-            var daysBetweenPeriods = DaysBetweenPeriods ?? default(int);
+            var totalDays = Days ?? default;
+            var daysBetweenPeriods = DaysBetweenPeriods ?? default;
             return totalDays / daysBetweenPeriods;
         }
 
         public int GetPeriodsCount_Months()
         {
-            return Months ?? default(int); // оплата каждый месяц
+            return Months ?? default; // оплата каждый месяц
         }
 
         public decimal CalculateTotalPayment()
@@ -136,13 +136,13 @@ namespace CreditCalculator.Models
             switch (RepaymentPeriodicity)
             {
                 case RepaymentPeriodicity.Days:
-                    var daysBetweenPeriods = DaysBetweenPeriods ?? default(int);
+                    var daysBetweenPeriods = DaysBetweenPeriods ?? default;
                     return paymentDate.AddDays(daysBetweenPeriods);
                 case RepaymentPeriodicity.Months:
                     return paymentDate.AddMonths(1); // оплата ежемесячно
             }
 
-            return default(DateTime);
+            return default;
         }
 
         public decimal CalculateAnnuityPayment(decimal creditAmount)
