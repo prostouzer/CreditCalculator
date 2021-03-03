@@ -12,7 +12,7 @@ namespace CreditCalculator.Models
         public const int MinRate = 1; // минимально возможная ставка % годовых
         public const int MaxRate = 10000; // максимальная ставка % годовых
 
-        public const int MinDays = 10; // минимальное количество дней
+        public const int MinDays = 2; // минимальное количество дней
         public const int MaxDays = 1000; // максимальное количество дней
 
         public const int MinMonths = 1; // минимальное количество месяцев
@@ -28,10 +28,13 @@ namespace CreditCalculator.Models
         [Range(MinAmount, int.MaxValue, ErrorMessage = "Неправильное значение")]
         public decimal CreditAmount { get; set; }
 
-        [Display(Name = "Ставка, % годовых")]
+        [Display(Name = "Ставка, % в день")]
         [Required(ErrorMessage = "Укажите ставку")]
         [Range(MinRate, MaxRate, ErrorMessage = "Неправильное значение")]
         public double Rate { get; set; }
+
+        [Display(Name = "в год")]
+        public bool IsAnnualRate { get; set; } // годовая ставка
 
         [Display(Name = "Периодичность платежей")]
         [Required(ErrorMessage = "Укажите периодичность платежей")]
@@ -45,6 +48,7 @@ namespace CreditCalculator.Models
         [Display(Name = "Шаг платежа в днях")]
         [RequiredIf("RepaymentPeriodicity", Operator.EqualTo, RepaymentPeriodicity.Days, ErrorMessage = "Введите значение")]
         [Range(1, MaxDays)] // количество дней между платежами должно быть больше 1 и не больше MaxDays 
+        [LessThanOrEqualTo("Days", ErrorMessage = "Шаг платежа не может быть больше срока")]
         public int? DaysBetweenPeriods { get; set; }
 
         [Display(Name = "Срок (месяцев)")]
@@ -59,7 +63,14 @@ namespace CreditCalculator.Models
         public void Configure()
         {
             Rate *= 0.01;
-            Rate /= 12; // проценты годовых
+            if (IsAnnualRate)
+            {
+                Rate /= 12;
+            }
+            else
+            {
+                Rate *= 30;
+            }
             _paymentPeriodsCount = CalculatePeriodsCount();
 
             TotalPayment = CalculateTotalPayment();
@@ -142,10 +153,12 @@ namespace CreditCalculator.Models
             var annuityPayment = (decimal)annuityCoefficient * creditAmount;
             return annuityPayment;
         }
+
         public decimal CalculateBody(int number, decimal annuityPayment)
         {
             return annuityPayment / (decimal)Math.Pow(1 + Rate, _paymentPeriodsCount - number + 1);
         }
+
         public decimal CalculatePercent(int number, decimal annuityPayment)
         {
             return annuityPayment * (1 - 1 / (decimal)Math.Pow(1 + Rate, _paymentPeriodsCount - number + 1));

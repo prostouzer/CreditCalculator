@@ -20,9 +20,6 @@
                     Дата платежа
                 </th>
                 <th>
-                    Аннуитетный платеж
-                </th>
-                <th>
                     Размер платежа по телу
                 </th>
                 <th>
@@ -44,9 +41,6 @@
                         @payment.Date.ToShortDateString()
                     </td>
                     <td>
-                        @decimal.Round(payment.AnnuityPayment, 2)
-                    </td>
-                    <td>
                         @decimal.Round(payment.Body, 2)
                     </td>
                     <td>
@@ -57,6 +51,11 @@
                     </td>
                 </tr>
             }
+            <tr>
+                <td colspan="5">
+                    <h4>Аннуитетный платеж: @decimal.Round(Model.PaymentsList[0].AnnuityPayment, 2)</h4>
+                </td>
+            </tr>
             <tr>
                 <td colspan="5">
                     <h4>Переплата: @decimal.Round(Model.Overpay, 2)</h4>
